@@ -20,11 +20,10 @@ UserSchema = new Schema({
         unique: true,   
     },
 
-    // image: {
-    //     data: Buffer,
-    //     contentType: String,
-    //     required: false,
-    // },
+    image: {
+        data: Buffer,
+        contentType: String,
+    },
 
     bio: {
         type: String,

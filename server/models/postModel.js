@@ -23,11 +23,10 @@ const postSchema = new Schema({
         required: true,
     },
 
-    // image: {
-    //      data: Buffer,
-    //      contentType: String,
-    //      required: false,
-    //  },
+    image: {
+         data: Buffer,
+         contentType: String,
+     },
 
     likes: {
         type: Number,

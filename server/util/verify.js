@@ -1,14 +1,11 @@
 const jwt = require('jsonwebtoken');
-const Blacklist = require('../models/blacklistModel');
 
 module.exports = async (req, res, next) => {
-    const token = req.header('Authorization');
+    const token = req.cookies.token;
     if (!token) {
-        throw Error('No token provided');
+        throw Error('unauthorized');
     }
-    const isBlackList = await Blacklist.findOne({ token });
-    if (isBlackList) throw Error('Not logged in');
-    const userId = jwt.verify(token.split(' ')[1], process.env.TOKEN_KEY, (err, res) => {
+    const userId = jwt.verify(token, process.env.TOKEN_KEY, (err, res) => {
         if (err) throw Error("forbidden");
         return res.id;
     })

@@ -12,13 +12,6 @@ class commentController {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(404).json({error: `invalid id: ${id}`});
         }
-
-        // const post = await Post.findById(id);
-        // if (!post)
-        // { 
-        //     return res.status(404).json({error: `No post with id post: ${id}`});
-        // }
-
         const comments = await Comment.find({post: id});
         if (!comments || comments.length === 0) {
             return res.status(200).json({ message: 'no comments yet'} );
@@ -35,7 +28,6 @@ class commentController {
                 return res.status(404).json({error: `invalid id: ${id}`});
             }
             const post = await Post.findById(id);
-            console.log(post);
             if (!post)
             { 
                 return res.status(404).json({error: `No post with id: ${id}`});
@@ -64,15 +56,14 @@ class commentController {
 
     static async deleteComment(req, res) {
         try{
-            const userId = verify(req, res);
+            const userId = await verify(req, res);
             const { id } = req.params;
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 return res.status(404).json({ error: `No comment with id ${id}` });
             }
             const comment = await Comment.findById(id);
-
-            if(!(comment.user.equals(userId))) return res.status(401).json({ error: 'only the person who made this comment can delete it' });
             if (!comment) return res.status(404).json({ error: `No comment with id ${id}` });
+            if(!(comment.user.equals(userId))) return res.status(401).json({ error: 'only the person who made this comment can delete it' });
             await Comment.findByIdAndDelete(id);
             res.status(200).json({ deleted: comment })
         } catch(error) {
@@ -82,15 +73,17 @@ class commentController {
 
     static async updateComment(req, res) {
         try{
-            const userId = verify(req, res);
+            const userId = await verify(req, res);
             const { id } = req.params;
             if (!mongoose.Types.ObjectId.isValid(id)) {
                 return res.status(404).json({ error: `No comment with id ${id}` });
             }
             const body = req.body;
-            const comment = await Comment.findByIdAndUpdate(id, body, { new: true });
-            if(!(comment.user.equals(userId))) return res.status(401).json({ error: 'only the person who made this comment can edit it' });
+            let comment = await Comment.findById(id);
             if (!comment) return res.status(404).json({ error: `No comment with id ${id}` });
+            // console.log(comment.user, userId);
+            if (!(comment.user.equals(userId))) return res.status(401).json({ error: 'only the person who made this comment can edit it' });
+            comment = await Comment.findByIdAndUpdate(id, body, { new: true });
             res.status(200).json({ updated: comment })
         } catch(error) {
             res.status(400).json({error: error.message});
