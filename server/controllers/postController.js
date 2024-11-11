@@ -36,7 +36,7 @@ class postController {
             const post = new Post({ title, text, author});
             if (req.file) {
                 const dirname = path.dirname(__dirname);
-                const filepath = path.join(dirname + '/uploads/' + req.file.filename);
+                const filepath = path.join(dirname + '/uploads/postImage/' + title);
                 const img = {
                     data: fs.readFileSync(filepath),
                     contentType: 'image/png',
@@ -109,6 +109,7 @@ class postController {
                return res.status(404).json({error: `No post with id: ${id}`});
             }
             post.like(user);
+            post.save();
             res.status(200).json({ message: `${user.username} liked: ${post}` })
         } catch(error) {
             res.status(400).json({error: error.message});

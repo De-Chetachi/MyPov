@@ -48,6 +48,8 @@ router.post('/signup', upload.single("image"), userController.register);
 //login a new user
 router.post('/login', userController.login);
 
+router.patch('/updateUser', upload.single("image"), userController.updateUser);
+
 //log out from a session
 //router.get('/logout', userController.logout);
 //get all comments on a postt

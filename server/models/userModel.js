@@ -37,12 +37,9 @@ UserSchema = new Schema({
 }, {timestamps: true});
 
 UserSchema.pre('save', async function(next) {
-    console.log(this);
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(this.password, salt);
-    console.log(salt, hash);
     this.password = hash;
-    console.log(this);
     next();
 });
 

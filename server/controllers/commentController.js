@@ -14,7 +14,7 @@ class commentController {
         }
         const comments = await Comment.find({post: id});
         if (!comments || comments.length === 0) {
-            return res.status(200).json({ message: 'no comments yet'} );
+            return res.status(200).json({ message: 'be the first to comment'} );
         }
         return res.status(200).json(comments)
 
