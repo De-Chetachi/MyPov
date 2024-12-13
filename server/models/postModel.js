@@ -24,8 +24,9 @@ const postSchema = new Schema({
     },
 
     image: {
-         data: Buffer,
-         contentType: String,
+        type: String,
+         //data: Buffer,
+         //contentType: String,
      },
 
     likes: {
@@ -48,6 +49,7 @@ postSchema.methods.like = function(user) {
     this.likedBy.push(user);
     this.likes = this.likes + 1;
 }
+
 postSchema.methods.getLikes = function() {
     return this.likes;
 }

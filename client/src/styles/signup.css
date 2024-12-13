@@ -1,0 +1,50 @@
+.signupContainer{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh;
+    margin: 20px 0;
+}
+.signup{
+    border: 1px solid;
+    width: 80%;
+    max-width: 400px;
+    min-height: 540px;
+    padding: 10px;
+}
+.login{
+    border: 1px solid;
+    width: 80%;
+    max-width: 400px;
+    height: 300px;
+    padding: 10px;
+}
+input {
+    width: 95%;
+    margin: 10px 0;
+    height: 25px;
+}
+textarea {
+    width: 95%;
+    margin: 10px 0;
+    height: 125px;
+}
+.but {
+    padding: 10px;
+    width: 120px;
+    border-radius: 15px;
+    border: none;
+    background-image: linear-gradient(to right, #FFABE1, #937DC2);
+}
+
+.but :hover {
+    background-color: #da44b4;
+}
+.right {
+    margin: 20px 0;
+    float: right;
+}
+.top{
+    position: relative;
+    top: 80px;
+}

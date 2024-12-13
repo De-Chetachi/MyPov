@@ -5,30 +5,8 @@ const commentController = require('../controllers/commentController');
 const multer = require('multer');
 
 
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-      cb(null, 'uploads')
-    },
-    filename: function (req, file, cb) {
-      cb(null, file.fieldname + '-' + Date.now())
-    }
-  });
-
-const fileFilter = (req, file, cb) => {
-    if (file.mimetype.startsWith('image/')) {
-      cb(null, true);
-    } else {
-      cb(null, false);
-    }
-};
-
-const upload = multer({
-    storage: storage,
-    limits: {
-        fileSize: 1024 * 1024 * 5,
-    },
-    fileFilter: fileFilter
-});
+const storage = multer.memoryStorage();
+const upload = multer({ storage }).single('image');
 
 const router = express.Router();
 // GET post by id
@@ -36,19 +14,29 @@ router.get('/posts/:id', postController.getPost);
 // GET all posts
 router.get('/posts', postController.getPosts);
 //require authentication
+
+//get post author
+router.get('/posts/author/:id', postController.getAuthor)
+
 //create a new post
-router.post('/posts', upload.single("image"), postController.createPost);
+router.post('/posts', upload, postController.createPost);
+
+//post an image
+router.post('/posts/upload_image', upload, postController.postImages);
+
 //update an existing post
 router.patch('/posts/:id', postController.updatePost);
 //delete a post by id
 router.delete('/posts/:id', postController.deletePost);
 //doesnt
 //signup a new user
-router.post('/signup', upload.single("image"), userController.register);
+router.get('/users/:id', userController.getUser);
+router.post('/signup', userController.register);
+router.patch('/profilePicture', upload, userController.profilePicture);
 //login a new user
 router.post('/login', userController.login);
 
-router.patch('/updateUser', upload.single("image"), userController.updateUser);
+router.patch('/updateUser', upload, userController.updateUser);
 
 //log out from a session
 //router.get('/logout', userController.logout);

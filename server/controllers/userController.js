@@ -2,8 +2,9 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/userModel');
 const { createSecretToken } = require("../util/sToken");
 const verify = require('../util/verify');
-const fs = require('fs');
-const path = require('path');
+const { mongoose } = require('mongoose');
+const uploadMiddleware = require('../middleware/uploadMiddleware');
+
 
 class UserController {
     static async register(req, res) {
@@ -18,36 +19,52 @@ class UserController {
             if (existingUser) {
                 return res.status(400).json({ error: "User already exists" });
             }
-            const user = new User({ username, email, name, bio: bio || '', password});
-            if (req.file) {
-                const dirname = path.dirname(__dirname);
-                const filepath = path.join(dirname + '/uploads/profileImage/' + username);
-                img = {
-                    data: fs.readFileSync(filepath ),
-                    contentType: 'image/png',
-                }
-                user.image = img;  
-            }
-            user.save();
+            const user = User.create({ username, email, name, bio: bio || '', password});
             return res.status(201).json({ message: 'registration successful', user });
         } catch(error) {
             return res.status(404).json({error: 'registration failure', error: error.message });
         }
     };
 
-    static async updateUser(req, res) {
+    static async getUser(req, res) {
+        try{ 
+            const { id } = req.params;
+            if (!mongoose.Types.ObjectId.isValid(id)){
+                return res.status(404).json({error: `No user with id: ${id}`});
+            }
+            const user = await User.findById(id);
+            if (!user) return res.status(404).json({ error: 'user not found' });
+            return res.status(200).json(user);
+
+        } catch(error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+
+    static async profilePicture(req, res) {
+        try {
+            const userId = await verify(req, res);
+            const user = await User.findById(userId);
+            if (!user) return res.status(404).json({ error: 'user not found' });
+            if (req.file) {
+                const imgObject = await uploadMiddleware(req);
+                user.image = imgObject.url;
+                user.save();
+                return res.status(201).json({ message: 'profile picture updated successfully', user });
+            }
+            return res.status(400).json({ error: 'profile picture not updated' });
+        } catch(error) {
+            return res.status(400).json({ error: error.message });
+        }
+    }
+    static async updateUser(req, res) {             
         try{
             const userId = await verify(req, res);
             const update = res.body;
             const user = User.findById(userId);
             if (req.file) {
-                const dirname = path.dirname(__dirname);
-                const filepath = path.join(dirname + '/uploads/profileImage/' + req.user.username);
-                img = {
-                    data: fs.readFileSync(filepath ),
-                    contentType: 'image/png',
-                }
-                update.image = img;  
+                const img = await uploadMiddleware(req);
+                update.image = img.url;  
             }
             user = await User.findByIdAndUpdate(userId, update, { new: true });
             return res.status(201).json(user);
