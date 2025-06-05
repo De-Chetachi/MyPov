@@ -14,28 +14,32 @@ class commentController {
         }
         const comments = await Comment.find({post: id});
         if (!comments || comments.length === 0) {
-            return res.status(200).json({ message: 'be the first to comment'} );
+            return res.status(200).json([]);
         }
         return res.status(200).json(comments)
 
     }
 
-    static async addComment(req, res, next) {
+    static async addComment(req, res) {
         try {
             const { id } = req.params;
-            const userId = await verify(req, res, next);
+            const userId = await verify(req, res);
             if (!mongoose.Types.ObjectId.isValid(id)){
                 return res.status(404).json({error: `invalid id: ${id}`});
             }
             const post = await Post.findById(id);
+            post.comment();
             if (!post)
             { 
                 return res.status(404).json({error: `No post with id: ${id}`});
             }
             const user = await User.findById(userId);
+            if(!user) {
+                return res.status(404).json({error: `No user with id: ${userId}`});
+            }
             const { body } = req.body;
             const comment = await Comment.create({ user, post, body });
-            return res.status(200).json(comment)
+            return res.status(201).json(comment)
         } catch(error) {
             res.status(400).json({error: error.message});
         }
@@ -65,7 +69,7 @@ class commentController {
             if (!comment) return res.status(404).json({ error: `No comment with id ${id}` });
             if(!(comment.user.equals(userId))) return res.status(401).json({ error: 'only the person who made this comment can delete it' });
             await Comment.findByIdAndDelete(id);
-            res.status(200).json({ deleted: comment })
+            res.status(204).json({ deleted: comment })
         } catch(error) {
             res.status(400).json({error: error.message});
         }

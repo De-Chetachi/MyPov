@@ -8,19 +8,19 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
 
 class UserController {
     static async register(req, res) {
-        const { username, email, password, name, bio} = req.body;
+        const { username, email, password, bio} = req.body;
         if (!username) return res.status(400).json({error: `username required`});
         if (!email) return res.status(400).json({error: `email required`});
         if (!password) return res.status(400).json({error: `password required`});
-        if (!name) return res.status(400).json({error: `name required`});
+        // if (!name) return res.status(400).json({error: `name required`});
         
         try {
             const existingUser = await User.findOne({ email });
             if (existingUser) {
                 return res.status(400).json({ error: "User already exists" });
             }
-            const user = User.create({ username, email, name, bio: bio || '', password});
-            return res.status(201).json({ message: 'registration successful', user });
+            const user = User.create({ username, email, bio: bio || '', password});
+            return res.status(201).json({ message: 'registration successful', username });
         } catch(error) {
             return res.status(404).json({error: 'registration failure', error: error.message });
         }
@@ -40,6 +40,23 @@ class UserController {
             return res.status(400).json({ error: error.message });
         }
     }
+
+    static async isLogged(req, res) {
+        try {
+            const userId = await verify(req, res);
+            console.log(userId)
+            if (userId)  {
+                const user =  await User.findById(userId);
+                return res.status(200).json({ user })
+            }
+            else {
+                return res.status(401).json({ message: "unauthorized" });
+            }
+        } catch(err){
+            return res.status(401).json({message: "unauthorized"})
+        }
+    }
+
 
     static async profilePicture(req, res) {
         try {
@@ -73,13 +90,17 @@ class UserController {
         }
     }
 
-    static async login(req, res, next) {
-        const { username, password } = req.body;
-        if (!username || !password) {
+    static async login(req, res) {
+        const { email, password } = req.body;
+        if (!email || !password) {
             return res.json({error:'username and password are required'})
         }
+        const userId = await verify(req, res);
+        if (userId) {
+            return res.status(400).json({ error: 'you are already logged in' });
+        }
         try {
-            const user = await User.findOne({ username });
+            const user = await User.findOne({ email });
             if (!user) {
                 return res.status(404).json({ error: 'user not found' })
                 //return res.status(404).error('user not found');
@@ -87,8 +108,14 @@ class UserController {
             const isPassword = await user.comparePassword(password);
             if (!isPassword) return res.status(401).json({error: 'Incorrect password'});
             const token = createSecretToken({ id: user._id });
-            res.cookie('token', token);
-            return res.status(201).json({ message: 'user logged in successfully', token: token });
+            res.cookie('token', token, {
+                httpOnly: true,
+                secure: true,
+                sameSite: 'None',
+                path: '/',
+                maxAge: 3 * 24 * 60 * 60 * 1000,
+            });
+            return res.status(201).json({ message: 'user logged in successfully', token, user});
         } catch (err) {
             return res.status(400).json({ error: 'login failed', error: err.message });
         };
@@ -96,8 +123,11 @@ class UserController {
 
     static async logout(req, res) {
         try {
-            await verify(req, res);
-            res.cookie('token', null);
+            const userId = await verify(req, res);
+            if (!userId) {
+                return res.status(401).json({ message: 'unauthorized' });
+            }
+            res.clearCookie('token');
             return res.status(200).json({ message: 'logged out successfully' });
         } catch(error) {
             return res.status(401).json({error: error.message});

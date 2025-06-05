@@ -1,7 +1,7 @@
 import '../styles/signup.css';
 import { useNavigate } from "react-router-dom";
 
-function LogIn() {
+function LogIn({setLogin}) {
     const navigate = useNavigate();
     const handleSubmit = (event) => {
         event.preventDefault();
@@ -16,11 +16,14 @@ function LogIn() {
               'Accept': 'application/json',
               'Content-Type': 'application/json',
             },
+            credentials: 'include',
             body: JSON.stringify(data),
         }).then((res) => {
             if (res.ok) {
-                res.json().then((data) => {
-                    navigate('/profile');
+                res.json().then((data_) => {
+                    console.log(data_);
+                    setLogin();
+                    navigate('/');
                 }).catch((err) => {
                     alert(err);
                     navigate('/login');

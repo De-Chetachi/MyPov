@@ -10,17 +10,37 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
 
 class postController {
     static async getPosts(req, res) {
-        const posts = await Post.find({}).sort({ createdAt: -1 });
+        const posts = await Post.find({}).populate('author').sort({ createdAt: -1 });
+        res.status(200).json(posts);
+    }
+
+    static async getPostsByUser(req, res) {
+        const userId  = await  verify(req, res);
+        if (!userId) { 
+            return res.status(401).json({ error: 'unauthorized' });
+        }
+        if (!mongoose.Types.ObjectId.isValid(userId)) {
+            return res.status(404).json({ error: `No user with id: ${userId}` });
+        }
+        const posts = await Post.find({ author: userId }).populate('author').sort({ createdAt: -1 });
+        if (!posts || posts.length === 0) {
+            return res.status(200).json([]);
+        }  
+
         res.status(200).json(posts);
     }
 
     static async postImages(req, res) {
-        if (req.file) {
-            const imgObject = await uploadMiddleware(req);
-            const image = imgObject.url;
-            return res.status(200).json({ 'url': image });
+        try {
+            if (req.file) {
+                const imgObject = await uploadMiddleware(req);
+                const image = imgObject.url;
+                return res.status(200).json({image});
+            }
+            return res.status(400).json({error: "no file"});
+        } catch (err) {
+            return res.status(400).json(err.message)
         }
-        return res.status(400).json({error: "no file"})
         
     }
 
@@ -29,7 +49,7 @@ class postController {
         if (!mongoose.Types.ObjectId.isValid(id)){
             return res.status(404).json({error: `No post with id: ${id}`});
         }
-        const post = await Post.findById(id);
+        const post = await Post.findById(id).populate('author');
         if (!post)
         { 
             return res.status(404).json({error: `No post with id: ${id}`});
@@ -57,10 +77,10 @@ class postController {
         return res.status(200).json(author);
     }
 
-    static async createPost(req, res, next) {
+    static async createPost(req, res) {
         try {
-            const userId = await verify(req, res, next);
-            const { title, text } = req.body;
+            const userId = await verify(req, res);
+            const { title, text} = req.body;
             if (!title) return res.status(400).json({error: 'Title is required'});
             if (!text) return res.status(400).json({error: 'Text is required'}); 
             const author = await User.findById(userId);
@@ -69,7 +89,7 @@ class postController {
                 const imgObject = await uploadMiddleware(req);
                 post.image = imgObject.url;
             }
-            post.save();
+            await post.save();
             res.status(201).json({post});         
         } catch (error) {
             res.status(400).json({error: error.message});
@@ -135,7 +155,7 @@ class postController {
                return res.status(404).json({error: `No post with id: ${id}`});
             }
             post.like(user);
-            post.save();
+            await post.save();
             res.status(200).json({ message: `${user.username} liked: ${post}` })
         } catch(error) {
             res.status(400).json({error: error.message});

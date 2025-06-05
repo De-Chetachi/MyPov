@@ -21,8 +21,8 @@ function Register() {
             body: JSON.stringify(data),
         }).then((res) => {
             if(res.ok) {
-                res.json().then((data) => {
-                    alert(data.message);
+                res.json().then((data_) => {
+                    alert(data_.message);
                     navigate('/login');
                 }).catch((err) => {
                     console.log(err);
@@ -50,7 +50,7 @@ function Register() {
                 <form onSubmit={handleSubmit}>
                     <label>Username:
                         <br />
-                        <input
+                        <input className='my-2.5'
                             type="text"
                             name="username"
                             required
@@ -59,7 +59,7 @@ function Register() {
                     </label>
                     <label>Name:
                         <br />
-                        <input
+                        <input className='my-2.5'
                             type="text"
                             name="name"
                             required
@@ -68,7 +68,7 @@ function Register() {
                     </label>
                     <label>Email:
                         <br />
-                        <input
+                        <input className='my-2.5'
                             type="email"
                             name="email"
                             required
@@ -77,7 +77,7 @@ function Register() {
                     </label>
                     <label>Password:
                         <br />
-                        <input
+                        <input className='my-2.5'
                             type="password"
                             name="password"
                             required
@@ -85,12 +85,6 @@ function Register() {
                         />
                         <br />
                     </label>
-                    <label>Bio:
-                        <br />
-                        <textarea
-                            name="bio"/>
-                        <br />
-                    </label><br />
                     <button type="submit" className="but">Sign Up</button>
                 </form>
                 <p className="right">already have an account? <a href="/login">Login</a></p>

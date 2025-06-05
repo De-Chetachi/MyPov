@@ -1,13 +1,13 @@
 const jwt = require('jsonwebtoken');
 
-module.exports = async (req, res, next) => {
+module.exports = async (req, res) => {
     const token = req.cookies.token;
     if (!token) {
-        throw Error('unauthorized');
+        return null;
     }
     const userId = jwt.verify(token, process.env.TOKEN_KEY, (err, res) => {
-        if (err) throw Error("forbidden");
+        if (err) return null;
         return res.id;
-    })
+    });
     return userId.id;
 }

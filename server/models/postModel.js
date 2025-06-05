@@ -33,6 +33,10 @@ const postSchema = new Schema({
         type: Number,
         default: 0,
     },
+    comments: {
+        type: Number,
+        default: 0,
+    },
 
     likedBy: {
         type: Array,
@@ -48,6 +52,10 @@ postSchema.methods.commentP = function(comment) {
 postSchema.methods.like = function(user) {
     this.likedBy.push(user);
     this.likes = this.likes + 1;
+};
+
+postSchema.methods.comment = function() {
+    this.comments = this.comments + 1;
 }
 
 postSchema.methods.getLikes = function() {

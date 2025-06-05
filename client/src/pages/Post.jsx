@@ -2,13 +2,17 @@
 import { BsChatFill, BsPlusSquareFill, BsPlusSquare, BsHeart, BsFillHeartFill } from "react-icons/bs";
 import { useParams } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import Comment from "../components/Comment";
+import Comments from "../components/Comments";
 
 const Post = () => {
     const [post, setPost] = useState(null);
     const [writter, setWritter] = useState(null);
+    const [comments, setComments] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const { postId } = useParams();
+    //const [comm, setComm] = useState('hidden');
 
     const months = {
         "01": "Jan,",
@@ -37,8 +41,9 @@ const Post = () => {
                     setPost(data);
                 }
                 if (writterRes.ok) {
-                    setWritter(writterData)
+                    setWritter(writterData);
                 }
+                
             }
             catch (error) {
                 setError(error);
@@ -49,6 +54,10 @@ const Post = () => {
         }
         fetchPost();
     }, [postId]);
+
+    // const displayC = () => {
+    //     setComm('block');
+    // }
 
     const [isHeart, setIsHeart] = useState(false);
     const [isSave, setIsSave] = useState(false);
@@ -117,11 +126,20 @@ const Post = () => {
                             <BsHeart className={unLike} onClick={handleLike}/>
                             <BsFillHeartFill className={like} onClick={handleLike} />
                             </span>
-                    
-                            < BsChatFill className="size-6"/>
+
+                            <span>< BsChatFill className="size-6"/></span>
+                            {/* <span>< BsChatFill onClick={displayC} className="size-6"/></span> */}
                         </div>
                         < BsPlusSquareFill className={save} onClick={handleSave} />
                         < BsPlusSquare className={unSave} onClick={handleSave} />
+                    </div>
+
+                    <div className="comment">
+                        <Comment postId={postId} />
+                    </div>
+
+                    <div className="comments">
+                        <Comments postId={postId}/>
                     </div>
 
                     <div>

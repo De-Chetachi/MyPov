@@ -1,49 +1,133 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Home from './pages/Home';
-import Register from './pages/Signup';
-//import NavBar from './components/NavBar';
-import NavBar from './components/nav';
-import LogIn from './pages/login';
-import Post from './pages/Post';
-import Create from './pages/Create';
-import { useState } from 'react';
-import './index.css';
+import { Navigation } from './components/nav';
+import { HomePage } from './pages/homePage';
+import { LoginPage } from './pages/loginPage';
+import { SignupPage } from './pages/signupPage';
+import { DashboardPage } from './pages/dashboard';
+import { CreatePostPage } from './pages/Create';
+import { AboutPage } from './pages/aboutPage';
+import { useAuth } from './main';
+import React, { useState, useEffect, createContext, useContext } from 'react';
+import { User, Edit3, Heart, MessageCircle, Calendar, LogOut, Menu, X, Plus, Home, Info, Settings } from 'lucide-react';
+import { api } from './api'; 
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState('home');
+  const { user, isLoading } = useAuth();
+
+  // Redirect to login if trying to access protected pages without authentication
+  useEffect(() => {
+    const protectedPages = ['dashboard', 'create'];
+    if (!user && protectedPages.includes(currentPage)) {
+      setCurrentPage('login');
+    }
+  }, [user, currentPage]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const renderPage = () => {
+    switch (currentPage) {
+      case 'home':
+        return <HomePage />;
+      case 'login':
+        return <LoginPage setCurrentPage={setCurrentPage} />;
+      case 'signup':
+        return <SignupPage setCurrentPage={setCurrentPage} />;
+      case 'dashboard':
+        return <DashboardPage setCurrentPage={setCurrentPage} />;
+      case 'create':
+        return <CreatePostPage setCurrentPage={setCurrentPage} />;
+      case 'about':
+        return <AboutPage />;
+      default:
+        return <HomePage />;
+    }
+  };
 
   return (
-    <div className='app text-slate-600'>
-      <BrowserRouter>
-        <NavBar />
-        <div className="pages">
-          <Routes>
-            <Route
-            path='/'
-            element={ <Home />}
-            />
-            <Route
-            path='/register'
-            element= { <Register /> }
-            />
-            <Route
-            path='/login'
-            element= { <LogIn /> }
-            />
-            <Route 
-            path='posts/:postId'
-            //Component={ Post }
-            element = { <Post /> }
-            />
-            <Route
-            path='posts/create'
-            element = { <Create /> }
-             />
-          </Routes>
+    <div className="min-h-screen bg-gray-50">
+      <Navigation currentPage={currentPage} setCurrentPage={setCurrentPage} />
+      <main>
+        {renderPage()}
+      </main>
+      
+      {/* Footer */}
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="max-w-4xl mx-auto px-4">
+          <div className="grid md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-xl font-bold mb-4">MyPov</h3>
+              <p className="text-gray-400">
+                A platform for sharing perspectives and building connections through the power of writing.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Quick Links</h4>
+              <div className="space-y-2">
+                <button 
+                  onClick={() => setCurrentPage('home')}
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  Home
+                </button>
+                <button 
+                  onClick={() => setCurrentPage('about')}
+                  className="block text-gray-400 hover:text-white transition-colors"
+                >
+                  About
+                </button>
+                {user ? (
+                  <button 
+                    onClick={() => setCurrentPage('dashboard')}
+                    className="block text-gray-400 hover:text-white transition-colors"
+                  >
+                    Dashboard
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setCurrentPage('login')}
+                    className="block text-gray-400 hover:text-white transition-colors"
+                  >
+                    Login
+                  </button>
+                )}
+              </div>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-4">Connect</h4>
+              <div className="space-y-2">
+                <p className="text-gray-400">Follow us on social media</p>
+                <div className="flex space-x-4">
+                  <button className="text-gray-400 hover:text-white transition-colors">
+                    Twitter
+                  </button>
+                  <button className="text-gray-400 hover:text-white transition-colors">
+                    LinkedIn
+                  </button>
+                  <button className="text-gray-400 hover:text-white transition-colors">
+                    GitHub
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="border-t border-gray-800 mt-8 pt-8 text-center">
+            <p className="text-gray-400">
+              © 2024 MyPov. All rights reserved. Built with ❤️ for writers everywhere.
+            </p>
+          </div>
         </div>
-      </BrowserRouter>
+      </footer>
     </div>
-  )
+  );
 }
-
 export default App
