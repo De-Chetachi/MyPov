@@ -1,176 +1,271 @@
 //import React from 'react';
-import { BsChatFill, BsPlusSquareFill, BsPlusSquare, BsHeart, BsFillHeartFill } from "react-icons/bs";
-import { useParams } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import Comment from "../components/Comment";
-import Comments from "../components/Comments";
+import React, { useState, useEffect } from 'react';
+import { api } from '../api';
+import { ArrowLeft, Heart, MessageCircle, Send, User, Calendar } from 'lucide-react';
 
-const Post = () => {
-    const [post, setPost] = useState(null);
-    const [writter, setWritter] = useState(null);
-    const [comments, setComments] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const { postId } = useParams();
-    //const [comm, setComm] = useState('hidden');
+export function PostPage({ postId, onBack }) {
+  const [post, setPost] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [showComments, setShowComments] = useState(false);
+  const [submittingComment, setSubmittingComment] = useState(false);
 
-    const months = {
-        "01": "Jan,",
-        "02": "Feb,",
-        "03": "Mar,",
-        "04": "April,",
-        "05": "May,",
-        "06": "June,",
-        "07": "July,",
-        "08": "Aug,",
-        "09": "Sep,",
-        "10": "Oct,",
-        "11": "Nov,",
-        "12": "Dec,",
+  useEffect(() => {
+    const fetchPostData = async () => {
+      try {
+        // Fetch post details
+        const postData = await api.getPost(postId);
+        setPost(postData);
+        setLikeCount(postData.likes || 0);
+
+        // Check if user has liked this post
+        const likedStatus = await api.likedPost(postId);
+        setIsLiked(likedStatus || false);
+
+        // Fetch comments
+        const commentsData = await api.getPostComments(postId);
+        setComments(commentsData.comments);
+      } catch (error) {
+        alert('Failed to fetch post data. Please try again later.');
+        console.error('Failed to fetch post data:', error);
+        //setComments([])
+      } finally {
+        setLoading(false);
+      }
     };
 
-    useEffect(() => {
-        const fetchPost = async () => {
-            try {
-                const res = await fetch(`http://localhost:5000/mypov/api/v1/posts/${postId}`);
-                const writterRes = await fetch(`http://localhost:5000/mypov/api/v1/posts/author/${postId}`);
-                const data = await res.json();
-                const writterData = await writterRes.json();
-
-                if (res.ok) {
-                    setPost(data);
-                }
-                if (writterRes.ok) {
-                    setWritter(writterData);
-                }
-                
-            }
-            catch (error) {
-                setError(error);
-                console.log(error);
-            } finally{
-                setIsLoading(true);
-            }
-        }
-        fetchPost();
-    }, [postId]);
-
-    // const displayC = () => {
-    //     setComm('block');
-    // }
-
-    const [isHeart, setIsHeart] = useState(false);
-    const [isSave, setIsSave] = useState(false);
-
-    const handleSave = () => {
-        setIsSave(!isSave);
+    if (postId) {
+      fetchPostData();
     }
-    const handleLike = () => {
-        setIsHeart(!isHeart);
-        if (isHeart) {
-            post.likes -= 1;
-        } else {
-            post.likes += 1;
-            //fetch(`http://localhost:5000/mypov/api/v1/posts/${post._id}/like`);
-        }
+  }, [postId]);
+
+  const handleLike = async () => {
+    // Only allow liking if not already liked
+    if (isLiked) return;
+
+    try {
+      const response = await api.likePost(postId);
+      // Update state based on server response
+      setIsLiked(true);
+      setLikeCount(response.likeCount || (likeCount + 1));
+    } catch (error) {
+      console.error('Failed to like post:', error);
+      // Optionally show user-friendly error message
+      alert('Failed to like post. Please try again.');
     }
+  };
 
-    const like = isHeart ? 'size-6 inline ml-1' : 'hidden';
-    const unLike = isHeart ? 'hidden' : 'size-6 inline ml-1';
-    
+  const handleSubmitComment = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) return;
 
-    const save = isSave ? 'size-6' : 'hidden';
-    const unSave = isSave ? 'hidden' : 'size-6';
+    setSubmittingComment(true);
+    try {
+      const comment = await api.addComment(postId, newComment.trim());
+      
+      // Add the new comment to the existing comments
+      setComments(prev => {
+        const currentComments = Array.isArray(prev) ? prev : [];
+        return [...currentComments, comment];
+      });
+      setNewComment('');
+    } catch (error) {
+      console.error('Failed to add comment:', error);
+    } finally {
+      setSubmittingComment(false);
+    }
+  };
 
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  if (loading) {
     return (
-        <div className="post_page w-11/12 m-auto max-w-2xl mt-4">
-            {
-                post? (
-                <>
-                    <h1 className="font-bold text-4xl md:text-5xl text-black my-8 capitalize tracking-tight">{post.title}</h1>
-                    <div className="">
-                        {
-                            writter ? (
-                                <div className="flex mb-8">
-                                    {
-                                        writter.image ? (
-                                            <img className="size-12 rounded-full" src={writter.image} alt="profile picture" />
-                                        ) : (
-                                            <div className="size-12 bg-slate-700 rounded-3xl text-center content-center text-white text-2xl uppercase">{writter.username[0]}</div>
-                                            //<div className="size-16 bg-slate-700 rounded-full text-center text-white text-4xl uppercase"><p className="leading-normal align-middle h-full">{writter.username[0]}</p></div>
-                                        )
-                                    }
-                                    <div className="ml-4  self-center">
-                                        <h1 className="text-lg font-bold text-xl capitalize">{writter.username}</h1>
-                                        <p className="">
-                                            { String(post.createdAt).split('T')[0].split('-')[2] } { months[String(post.createdAt).split('T')[0].split('-')[1]] } { String(post.createdAt).split('T')[0].split('-')[0] }
-                                        </p>
-                                    </div>
-                                </div>
-                            ) : (
-                                <p>no writter</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600"></div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Post not found</h2>
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 text-purple-600 hover:text-purple-700"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Home
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Ensure comments is always an array for rendering
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        {/* Back Button */}
+        <button
+          onClick={onBack}
+          className="flex items-center gap-2 text-gray-600 hover:text-gray-900 mb-6 transition-colors"
+        >
+          <ArrowLeft className="h-5 w-5" />
+          Back
+        </button>
+
+        {/* Post Content */}
+        <article className="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+          {/* Post Header */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="h-10 w-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center">
+                
+                {post.author?.image ? (
+                    <img 
+                    src={post.author.image}
+                    alt={post.author.username}
+                    className="overflow-hidden rounded-full w-full h-full object-cover"
+                    />) : (
+                    <User className="h-5 w-5 text-white" />
+                    )
+                }
+              </div>
+              <div>
+                <h3 className="font-semibold text-gray-900">{post.author?.username || 'Unknown User'}</h3>
+                <div className="flex items-center gap-2 text-sm text-gray-500">
+                  <Calendar className="h-4 w-4" />
+                  {formatDate(post.createdAt)}
+                </div>
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
+          </div>
+
+          {/* Post Body */}
+          <div className="p-6">
+            <div className="prose max-w-none">
+              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                {post.text}
+              </p>
+            </div>
+          </div>
+
+          {/* Post Actions */}
+          <div className="px-6 py-4 border-t border-gray-100 flex items-center gap-6">
+            <button
+              onClick={handleLike}
+              disabled={isLiked}
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                isLiked 
+                  ? 'bg-purple-50 text-purple-600 cursor-default' 
+                  : 'bg-gray-50 text-gray-600 hover:bg-gray-100 cursor-pointer'
+              }`}
+            >
+              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+              <span>{likeCount}</span>
+            </button>
+            
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-50 text-gray-600 hover:bg-gray-100 transition-colors"
+            >
+              <MessageCircle className="h-5 w-5" />
+              <span>{comments.length} Comments</span>
+            </button>
+          </div>
+        </article>
+
+        {/* Comment Form */}
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Add a Comment</h3>
+          <form onSubmit={handleSubmitComment} className="space-y-4">
+            <textarea
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="Share your thoughts..."
+              className="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+              rows="4"
+              disabled={submittingComment}
+            />
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={!newComment.trim() || submittingComment}
+                className="flex items-center gap-2 px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                <Send className="h-4 w-4" />
+                {submittingComment ? 'Posting...' : 'Post Comment'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        {/* Comments Section */}
+        {showComments && (
+          <div className="bg-white rounded-lg shadow-md">
+            <div className="p-6 border-b border-gray-100">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Comments ({comments.length})
+              </h3>
+            </div>
+            
+            {comments.length === 0 ? (
+              <div className="p-6 text-center text-gray-500">
+                No comments yet. Be the first to share your thoughts!
+              </div>
+            ) : (
+              <div className="divide-y divide-gray-100">
+                {comments.map((comment) => (
+                  <div key={comment._id} className="p-6">
+                    <div className="flex items-start gap-3">
+                      <div className="h-8 w-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                        
+                        {comment.user.image ? (
+                            <img 
+                            src={comment.user.image}
+                            alt={comment.user.username}
+                            className="overflow-hidden rounded-full w-full h-full object-cover"
+                            />) : (
+                                <User className="h-4 w-4 text-white" />
                             )
                         }
-                    </div>
-                    <div className="img bg-slate-700 w-full h-80 md:h-96">
-                        {post.image ? (
-                            <img className="w-full h-80 md:h-96" src={post.image} alt="post image" />
-                        ) : (<p></p>)
-                        }
-                    </div>
-                    <p className="my-8">{post.text}</p>
-
-                    <div className="flex justify-between">
-                        <div className="flex w-28 justify-between">
-                            <span>{ post.likes }
-                            <BsHeart className={unLike} onClick={handleLike}/>
-                            <BsFillHeartFill className={like} onClick={handleLike} />
-                            </span>
-
-                            <span>< BsChatFill className="size-6"/></span>
-                            {/* <span>< BsChatFill onClick={displayC} className="size-6"/></span> */}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="font-semibold text-gray-900">
+                            {comment.user.username}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {comment.createdAt && formatDate(comment.createdAt)}
+                          </span>
                         </div>
-                        < BsPlusSquareFill className={save} onClick={handleSave} />
-                        < BsPlusSquare className={unSave} onClick={handleSave} />
+                        <p className="text-gray-700 leading-relaxed">
+                          {comment.body}
+                        </p>
+                      </div>
                     </div>
-
-                    <div className="comment">
-                        <Comment postId={postId} />
-                    </div>
-
-                    <div className="comments">
-                        <Comments postId={postId}/>
-                    </div>
-
-                    <div>
-                        <h1>more from this author</h1>
-                    </div>
-                    <div>
-                        <h1> more from this category</h1>
-                    </div>
-                    <div>
-                        <h1>recommended from mypov</h1>
-                    </div>
-                </>
-                ) :(
-                <div className="h-screen w-11/12 m-auto max-w-2xl mt-4">
-                    <div className="h-20 animate-pulse bg-slate-200 my-8"></div>
-
-                    <div className="w-3/6 md:w-2/6">
-                        <div className="flex">
-                            <div className="animate-pulse size-8 bg-slate-200 rounded-2xl text-center self-center content-center text-white text-xl uppercase"></div>
-                            <div className="ml-2 h-8 bg-slate-200 animate-pulse grow self-center"></div>
-                        </div>
-                    </div>
-                 
-                    <div className="h-1/4 my-6 bg-slate-200 animate-pulse"></div>
-                    <div className="h-1/4 my-6 bg-slate-200 animate-pulse"></div>
-                    <div className="h-6 bg-slate-200 animate-pulse"></div>
-               </div>
-                )
-            }
-        </div>
-    );
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
 }
-
-export default Post;

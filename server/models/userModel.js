@@ -28,7 +28,17 @@ UserSchema = new Schema({
         type: String,
         required: true,
     },
-}, {timestamps: true});
+}, {
+    timestamps: true,
+    toJSON: {
+        transform: function(doc, ret) {
+            delete ret.password; // remove password from the output
+            delete ret.createdAt;
+            delete ret.updatedAt;
+            return ret;
+        }
+    }
+});
 
 UserSchema.pre('save', async function(next) {
     const salt = bcrypt.genSaltSync(10);

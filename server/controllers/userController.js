@@ -44,7 +44,6 @@ class UserController {
     static async isLogged(req, res) {
         try {
             const userId = await verify(req, res);
-            console.log(userId)
             if (userId)  {
                 const user =  await User.findById(userId);
                 return res.status(200).json({ user })
@@ -77,15 +76,21 @@ class UserController {
     static async updateUser(req, res) {             
         try{
             const userId = await verify(req, res);
-            const update = res.body;
-            const user = User.findById(userId);
+            console.log(userId);
+            const { username, bio } = req.body;
+            const user = await User.findById(userId);
+            if (!user) return res.status(404).json({ error: 'user not found' });
             if (req.file) {
                 const img = await uploadMiddleware(req);
-                update.image = img.url;  
+                user.image = img.url;  
             }
-            user = await User.findByIdAndUpdate(userId, update, { new: true });
-            return res.status(201).json(user);
+            user.username = username || user.username;
+            user.bio = bio || user.bio;
+            await user.save();
+            console.log(user);
+            return res.status(200).json({user});
         } catch(error) {
+            console.log(error);
             res.status(400).json({ error: error.message });
         }
     }
@@ -117,7 +122,7 @@ class UserController {
             });
             return res.status(201).json({ message: 'user logged in successfully', token, user});
         } catch (err) {
-            return res.status(400).json({ error: 'login failed', error: err.message });
+            return res.status(401).json({ error: 'login failed', error: err.message });
         };
     };
 

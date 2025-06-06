@@ -50,7 +50,7 @@ postSchema.methods.commentP = function(comment) {
 }
 
 postSchema.methods.like = function(user) {
-    this.likedBy.push(user);
+    this.likedBy.push(user._id);
     this.likes = this.likes + 1;
 };
 

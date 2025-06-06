@@ -4,9 +4,17 @@ import { api } from '../api';
 import { User, Edit3, Heart, MessageCircle, Calendar, LogOut, Menu, X, Plus, Home, Info, Settings } from 'lucide-react';
 
 
-export function HomePage() {
+
+export function HomePage({  onPostClick}) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const handlePostClick = (postId) => {
+    if (onPostClick) {
+      onPostClick(postId);
+    }
+  };
+
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -53,7 +61,13 @@ export function HomePage() {
         ) : (
           <div className="space-y-8">
             {posts.map((post) => (
-              <PostCard key={post.id} post={post} />
+              <div
+                key={post._id} 
+                onClick={() => handlePostClick(post._id)}
+                className="con"
+              >
+                <PostCard key={post._id} post={post} />
+              </div>
             ))}
           </div>
         )}

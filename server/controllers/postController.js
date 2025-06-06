@@ -141,6 +141,19 @@ class postController {
         }
     }
 
+    static async userLiked(req, res) {
+        const userId = await verify(req, res);
+        const postId = req.params.id;
+        const post = await Post.findById(postId);
+        if (!post || !userId) {
+            return res.status(400).json({ error: 'bad request' });
+        }
+        if (!post.likedBy.includes(userId)) {
+            return res.status(200).json({ liked: false });
+        }
+        return res.status(200).json({ liked: true });    
+    }
+
     static async like(req, res) {
         try{
             const userId = await verify(req, res);
@@ -154,7 +167,7 @@ class postController {
             { 
                return res.status(404).json({error: `No post with id: ${id}`});
             }
-            post.like(user);
+            await post.like(user);
             await post.save();
             res.status(200).json({ message: `${user.username} liked: ${post}` })
         } catch(error) {

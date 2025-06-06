@@ -35,6 +35,7 @@ router.post('/posts', upload, postController.createPost);
 
 //update an existing post, only available to the author of the post
 router.patch('/posts/:id', postController.updatePost);
+
 //returns a post object {title, body, image, author, createdAt, updatedAt, likes, likedBy}
 
 
@@ -78,5 +79,6 @@ router.patch('/posts/comments/:id', commentController.updateComment);
 
 // like a post
 router.post('/posts/:id/like', postController.like);
-
+// check if a user has liked a post
+router.get('/posts/:id/liked', postController.userLiked);
 module.exports = router;

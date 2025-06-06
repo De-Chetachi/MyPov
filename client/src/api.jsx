@@ -36,12 +36,11 @@ export const api = {
     const response = await fetch(`${urlBase}updateUser`, {
       method: 'PATCH',
       credentials: 'include',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(userData)
+      body: userData,
     });
     const res =  await response.json();
     if (response.ok) {
-        return res;
+        return res.user;
     } else {
         return null;
     }
@@ -57,6 +56,30 @@ export const api = {
     } else {
         return null;
     }   
+  },
+
+  async getPost(postId) {
+    const response = await fetch(`${urlBase}posts/${postId}`, {
+      credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+      return res;
+    } else {
+        return null;
+    }   
+  },
+
+  async getPostComments(postId) {
+    const response = await fetch(`${urlBase}posts/${postId}/comments`, {
+      credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res;
+    } else {
+        return null;
+    }
   },
 
   async getUserPosts() {
@@ -112,12 +135,12 @@ export const api = {
     }
   },
 
-  async commentOnPost(postId, commentData) {
+  async addComment(postId, commentData) {
     const response = await fetch(`${urlBase}posts/${postId}/comments`, {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(commentData)
+      body: JSON.stringify({ body: commentData }),
     });
     const res =  await response.json();
     if (response.ok) {
@@ -139,6 +162,19 @@ export const api = {
         return null;
     }
   },
+
+  async likedPost(postId) {
+    const response = await fetch(`${urlBase}posts/${postId}/liked`, {
+      credentials: 'include'
+    });
+    const res = await response.json();
+    if (response.ok) {
+        return res.liked;
+    } else {
+        return null;
+    }
+  },
+
 
   async logout() {
     const response = await fetch(`${urlBase}logout`, {

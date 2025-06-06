@@ -1,6 +1,7 @@
-const Comment = require('../models/commentModel');
+
 const Post = require('../models/postModel');
 const User = require('../models/userModel');
+const Comment = require('../models/commentModel');
 const verify = require('../util/verify');
 const { mongoose } = require('mongoose');
 const { ObjectId } = require('mongodb');
@@ -12,11 +13,11 @@ class commentController {
         if (!mongoose.Types.ObjectId.isValid(id)) {
             return res.status(404).json({error: `invalid id: ${id}`});
         }
-        const comments = await Comment.find({post: id});
+        const comments = await Comment.find({post: id}).populate('user');
         if (!comments || comments.length === 0) {
-            return res.status(200).json([]);
+            return res.status(200).json({comments: []});
         }
-        return res.status(200).json(comments)
+        return res.status(200).json({comments});
 
     }
 
@@ -29,6 +30,7 @@ class commentController {
             }
             const post = await Post.findById(id);
             post.comment();
+            post.save();
             if (!post)
             { 
                 return res.status(404).json({error: `No post with id: ${id}`});
@@ -39,6 +41,7 @@ class commentController {
             }
             const { body } = req.body;
             const comment = await Comment.create({ user, post, body });
+            comment.save();
             return res.status(201).json(comment)
         } catch(error) {
             res.status(400).json({error: error.message});
