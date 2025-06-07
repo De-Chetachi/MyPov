@@ -32,7 +32,7 @@ UserSchema = new Schema({
     timestamps: true,
     toJSON: {
         transform: function(doc, ret) {
-            delete ret.password; // remove password from the output
+            delete ret.password;
             delete ret.createdAt;
             delete ret.updatedAt;
             return ret;
