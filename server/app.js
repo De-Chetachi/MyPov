@@ -10,7 +10,7 @@ const express = require('express');
 
 const app = express();
 app.use(cors({
-  origin: ['http://localhost:5173', 'https://my-pov-client.vercel.app/'],
+  origin: ['http://localhost:5173', 'https://my-pov-client.vercel.app'],
   credentials: true
 }));
 app.options('*', cors()); // Enable pre-flight requests for all routes
