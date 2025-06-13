@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const cookieParser = require("cookie-parser");
 
@@ -17,6 +18,10 @@ const corsOptions = {
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors(corsOptions));
+
+app.get('/', (req, res) => {
+  res.send('Welcome to MyPOV API!');
+});
 
 
 app.use((req, res, next) => {
