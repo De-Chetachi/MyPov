@@ -9,15 +9,13 @@ const cors = require('cors');
 const express = require('express');
 
 const app = express();
-
-const corsOptions = {
+app.use(cors({
   origin: ['http://localhost:5173', 'https://my-pov-client.vercel.app/'],
   credentials: true
-};
-
+}));
+app.options('*', cors()); // Enable pre-flight requests for all routes
 app.use(express.json());
 app.use(cookieParser());
-app.use(cors(corsOptions));
 
 app.get('/', (req, res) => {
   res.send('Welcome to MyPOV API!');
