@@ -1,9 +1,11 @@
 //import React from 'react';
 import React, { useState, useEffect } from 'react';
 import { api } from '../api';
+import { useAuth } from '../main';
 import { ArrowLeft, Heart, MessageCircle, Send, User, Calendar } from 'lucide-react';
 
-export function PostPage({ postId, onBack }) {
+export function PostPage({ handleAuth, postId, onBack }) {
+  const { user } = useAuth();
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
@@ -22,8 +24,9 @@ export function PostPage({ postId, onBack }) {
         setLikeCount(postData.likes || 0);
 
         // Check if user has liked this post
-        const likedStatus = await api.likedPost(postId);
-        setIsLiked(likedStatus || false);
+        if (user)  {
+          setIsLiked(postData.userLiked);
+        }
 
         // Fetch comments
         const commentsData = await api.getPostComments(postId);
@@ -44,13 +47,19 @@ export function PostPage({ postId, onBack }) {
 
   const handleLike = async () => {
     // Only allow liking if not already liked
+    if (!user) {
+      handleAuth(); // Prompt user to log in if not authenticated
+      return;
+    }
+
     if (isLiked) return;
 
     try {
-      const response = await api.likePost(postId);
-      // Update state based on server response
       setIsLiked(true);
-      setLikeCount(response.likeCount || (likeCount + 1));
+      setLikeCount(likeCount + 1);
+      await api.likePost(postId);
+      // Update state based on server response
+      //setLikeCount(response.likes || (likeCount + 1));
     } catch (error) {
       console.error('Failed to like post:', error);
       // Optionally show user-friendly error message
@@ -59,6 +68,10 @@ export function PostPage({ postId, onBack }) {
   };
 
   const handleSubmitComment = async (e) => {
+    if (!user) {
+      handleAuth(); // Prompt user to log in if not authenticated
+      return;
+    }	
     e.preventDefault();
     if (!newComment.trim()) return;
 

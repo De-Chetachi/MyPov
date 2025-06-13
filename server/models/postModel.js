@@ -28,6 +28,11 @@ const postSchema = new Schema({
          //data: Buffer,
          //contentType: String,
      },
+    
+    userLiked: {
+        type: Boolean,
+        default: false,
+    },
 
     likes: {
         type: Number,

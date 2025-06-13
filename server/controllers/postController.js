@@ -10,7 +10,13 @@ const uploadMiddleware = require('../middleware/uploadMiddleware');
 
 class postController {
     static async getPosts(req, res) {
+        const userId = await verify(req, res);
         const posts = await Post.find({}).populate('author').sort({ createdAt: -1 });
+        for (let post of posts) {
+            if (userId && post.likedBy.includes(userId)) {
+              post.userLiked = true;  
+            } 
+        }   
         res.status(200).json(posts);
     }
 
@@ -50,9 +56,14 @@ class postController {
             return res.status(404).json({error: `No post with id: ${id}`});
         }
         const post = await Post.findById(id).populate('author');
+       
         if (!post)
         { 
             return res.status(404).json({error: `No post with id: ${id}`});
+        }
+        const userId = await verify(req, res);
+        if (userId && post.likedBy.includes(userId)) {
+            post.userLiked = true;  
         }
         res.status(200).json(post);
     }
@@ -169,7 +180,7 @@ class postController {
             }
             await post.like(user);
             await post.save();
-            res.status(200).json({ message: `${user.username} liked: ${post}` })
+            res.status(200).json({ message: `${user.username} liked: ${post}`, likes:  post.likes });
         } catch(error) {
             res.status(400).json({error: error.message});
         }

@@ -14,8 +14,7 @@ export function PostCard({ post }) {
     const checkLikeStatus = async () => {
       if (user && post._id) {
         try {
-          const likedStatus = await api.likedPost(post._id);
-          setLiked(likedStatus || false);
+          setLiked(post.userLiked);
         } catch (error) {
           console.error('Failed to check like status:', error);
           setLiked(false);

@@ -35,6 +35,10 @@ function App() {
     setSelectedPostId(null);
   };
 
+  const handleAuth = () => {
+    setCurrentPage('login');
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -61,7 +65,7 @@ function App() {
       case 'about':
         return <AboutPage />;
       case 'post':
-        return <PostPage postId={selectedPostId} onBack={handleBackFromPost} />;
+        return <PostPage handleAuth={handleAuth} postId={selectedPostId} onBack={handleBackFromPost} />;
       default:
         return <HomePage onPostClick={handlePostClick} />;
     }

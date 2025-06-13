@@ -1,6 +1,20 @@
-export const urlBase = 'https://my-pov-nine.vercel.app/mypov/api/v1/';
+//export const urlBase = 'https://my-pov-nine.vercel.app/mypov/api/v1/';
+export const urlBase = 'http://localhost:5000/mypov/api/v1/';
 
 export const api = {
+  async loggedIn() {
+    const response = await fetch(`${urlBase}isLoggedIn`, {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const res = await response.json();
+      return res.user;
+    } else {
+      return null;
+    }
+  },
+
   async login(email, password) {
     const response = await fetch(`${urlBase}login`, {
       method: 'POST',
@@ -9,12 +23,13 @@ export const api = {
       body: JSON.stringify({ email, password })
     });
     const res =  await response.json();
-    if (response.ok) {
-        return res;
-    }
-    else {
-        return null;
-    } 
+    return res
+    // if (response.ok) {
+    //     return res;
+    // }
+    // else {
+    //     return null;
+    //} 
   },
   
   async signup(userData) {
@@ -171,7 +186,7 @@ export const api = {
     if (response.ok) {
         return res.liked;
     } else {
-        return null;
+        return false;
     }
   },
 

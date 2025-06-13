@@ -21,8 +21,13 @@ export function AuthProvider({ children }) {
         const token = localStorage.getItem('token');
         const userData = localStorage.getItem('user');
         if (token && userData) {
-          const data = JSON.parse(userData);
-          setUser(data);
+          const user_ = await api.loggedIn();
+          if (!user_) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+          } else {
+            setUser(user_);
+          }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -44,10 +49,10 @@ export function AuthProvider({ children }) {
         setUser(response.user); 
         return { success: true };
       }
-      return { success: false, error: response.message };
+      return { success: false, error: response.error };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error: 'Login failed' };
+      return { success: false, error: error.message };
     }
   };
 

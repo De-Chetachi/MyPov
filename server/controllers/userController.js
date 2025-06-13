@@ -107,11 +107,11 @@ class UserController {
         try {
             const user = await User.findOne({ email });
             if (!user) {
-                return res.status(404).json({ error: 'user not found' })
+                return res.status(401).json({ error: 'invalid credentials' })
                 //return res.status(404).error('user not found');
             }
             const isPassword = await user.comparePassword(password);
-            if (!isPassword) return res.status(401).json({error: 'Incorrect password'});
+            if (!isPassword) return res.status(401).json({error: 'invalid credentials'});
             const token = createSecretToken({ id: user._id });
             res.cookie('token', token, {
                 httpOnly: true,
