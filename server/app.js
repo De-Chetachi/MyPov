@@ -11,7 +11,7 @@ const express = require('express');
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: ['http://localhost:5173', 'https://my-pov-client.vercel.app/'],
   credentials: true
 };
 
