@@ -1,5 +1,5 @@
-//export const urlBase = 'https://my-pov-nine.vercel.app/mypov/api/v1/';
-export const urlBase = 'http://localhost:5000/mypov/api/v1/';
+export const urlBase = 'https://my-pov-nine.vercel.app/mypov/api/v1/';
+//export const urlBase = 'http://localhost:5000/mypov/api/v1/';
 
 export const api = {
   async loggedIn() {
