@@ -167,6 +167,17 @@ export function PostPage({ handleAuth, postId, onBack }) {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
+            <div>
+              {
+                post.image && (
+                  <img 
+                    src={post.image}
+                    alt={post.title}
+                    className="w-full h-auto rounded-lg mb-4"
+                  />
+                )
+              }
+            </div>
           </div>
 
           {/* Post Body */}
