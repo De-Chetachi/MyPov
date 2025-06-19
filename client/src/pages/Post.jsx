@@ -167,7 +167,7 @@ export function PostPage({ handleAuth, postId, onBack }) {
               </div>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
-            <div>
+            <div className='img shrink-0 rounded-lg overflow-hidden'>
               {
                 post.image && (
                   <img 
