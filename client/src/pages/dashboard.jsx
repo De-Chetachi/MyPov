@@ -3,7 +3,7 @@ import { useAuth } from '../main';
 import { api } from '../api';
 import { User, Edit3, Heart, MessageCircle, Calendar, LogOut, Menu, X, Plus, Home, Info, Settings, Save, Trash2 } from 'lucide-react';
 
-export function DashboardPage({ setCurrentPage }) {
+export function DashboardPage({ setCurrentPage, onPostClick }) {
   const { user, setUser } = useAuth();
   const [userPosts, setUserPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,12 @@ export function DashboardPage({ setCurrentPage }) {
     title: '',
     body: ''
   });
+
+  const handlePostClick = (postId) => {
+    if (onPostClick) {
+      onPostClick(postId);
+    }
+  };
 
   useEffect(() => {
     fetchUserPosts();
@@ -344,7 +350,7 @@ export function DashboardPage({ setCurrentPage }) {
                       </div>
                     </div>
                   ) : (
-                    <div>
+                    <div onClick={() => handlePostClick(post._id)} >
                       <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
                       <div className="txt-img flex h-24 mb-4">
                         <div className="txt w-2/3 md:w-3/4">

@@ -5,7 +5,7 @@ import { User, Edit3, Heart, MessageCircle, Calendar, LogOut, Menu, X, Plus, Hom
 
 
 
-export function HomePage({  onPostClick}) {
+export function HomePage({  onPostClick }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 

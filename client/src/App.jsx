@@ -30,10 +30,22 @@ function App() {
     setCurrentPage('post');
   };
 
+  const handleUserPostClick = (postId) => {
+    setSelectedPostId(postId);
+    setCurrentPage('userPost');
+  };
+
+
   const handleBackFromPost = () => {
     setCurrentPage('home');
     setSelectedPostId(null);
   };
+
+  const handleDashFromPost = () => {
+    setCurrentPage('dashboard');
+    setSelectedPostId(null);
+  };
+
 
   const handleAuth = () => {
     setCurrentPage('login');
@@ -59,11 +71,13 @@ function App() {
       case 'signup':
         return <SignupPage setCurrentPage={setCurrentPage} />;
       case 'dashboard':
-        return <DashboardPage setCurrentPage={setCurrentPage} />;
+        return <DashboardPage setCurrentPage={setCurrentPage} onPostClick={handleUserPostClick} />;
       case 'create':
         return <CreatePostPage setCurrentPage={setCurrentPage} />;
       case 'about':
         return <AboutPage />;
+      case 'userPost':
+        return <PostPage handleAuth={handleAuth} postId={selectedPostId} onBack={handleDashFromPost} />;
       case 'post':
         return <PostPage handleAuth={handleAuth} postId={selectedPostId} onBack={handleBackFromPost} />;
       default:

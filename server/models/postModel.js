@@ -22,7 +22,7 @@ const postSchema = new Schema({
         ref: 'User',
         required: true,
     },
-
+    
     image: {
         type: String,
          //data: Buffer,
