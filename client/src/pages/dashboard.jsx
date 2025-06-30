@@ -316,7 +316,7 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
                       />
                       <textarea
                         value={editPostForm.body}
-                        onChange={(e) => setEditPostForm(prev => ({ ...prev, body: e.target.value }))}
+                        onChange={(e) => setEditPostForm(prev => ({ ...prev, text: e.target.value }))}
                         className="w-full text-gray-700 border-2 border-gray-300 focus:border-purple-600 outline-none p-2 rounded-md resize-none"
                         placeholder="Post content"
                         rows="4"
