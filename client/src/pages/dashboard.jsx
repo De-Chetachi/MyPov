@@ -60,7 +60,7 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
     setEditingPost(post._id);
     setEditPostForm({
       title: post.title,
-      body: post.body
+      text: post.text
     });
   };
 
@@ -68,7 +68,7 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
     try {
       const formData = new FormData();
       formData.append('title', editPostForm.title);
-      formData.append('body', editPostForm.body);
+      formData.append('text', editPostForm.text);
 
       // Assuming api.editPost returns the updated post object or a success indicator
       const updatedPostResponse = await api.editPost(postId, formData);
@@ -78,10 +78,10 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
       if (updatedPostResponse) {
         setUserPosts(prev => prev.map(post =>
           // Use post._id for comparison
-          post._id === postId ? { ...post, title: editPostForm.title, body: editPostForm.body } : post
+          post._id === postId ? { ...post, title: editPostForm.title, text: editPostForm.text } : post
         ));
         setEditingPost(null); // Exit editing mode
-        setEditPostForm({ title: '', body: '' }); // Clear form
+        setEditPostForm({ title: '', text: '' }); // Clear form
       } else {
         alert('Failed to update post. Server did not return a valid response.');
       }
@@ -350,9 +350,9 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
                       </div>
                     </div>
                   ) : (
-                    <div onClick={() => handlePostClick(post._id)} >
+                    <div >
                       <h3 className="text-xl font-bold text-gray-900 mb-2">{post.title}</h3>
-                      <div className="txt-img flex h-24 mb-4">
+                      <div onClick={() => handlePostClick(post._id)} className="txt-img flex h-24 mb-4">
                         <div className="txt w-2/3 md:w-3/4">
                           <p className="text-gray-600 mb-4 line-clamp-3">{post.text}</p>
                         </div>
