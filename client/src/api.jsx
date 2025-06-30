@@ -128,7 +128,7 @@ export const api = {
     const response = await fetch(`${urlBase}posts/${postId}`, {
       method: 'PATCH',
       credentials: 'include',
-      body: postData,
+      body: JSON.stringify(postData),
     });
     const res =  await response.json();
     if (response.ok) {
