@@ -67,14 +67,12 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
   const handleSavePost = async (postId) => {
     try {
       const formData = new FormData();
+      // Append the title and text from the editPostForm
       formData.append('title', editPostForm.title);
       formData.append('text', editPostForm.text);
+     
+      const updatedPostResponse = await api.editPost(formData, postId);
 
-      // Assuming api.editPost returns the updated post object or a success indicator
-      const updatedPostResponse = await api.editPost(postId, formData);
-
-      // Assuming updatedPostResponse contains the full updated post object from the API
-      // If your API returns only success/error, you'd rely on editPostForm values
       if (updatedPostResponse) {
         setUserPosts(prev => prev.map(post =>
           // Use post._id for comparison
@@ -126,8 +124,7 @@ export function DashboardPage({ setCurrentPage, onPostClick }) {
       if (profileImage) {
         formData.append('image', profileImage);
       }
-
-      // Assuming api.editProfile returns the updated user object
+      
       const updatedUser = await api.editProfile(formData);
       if (updatedUser) {
         // Update the user context with the new user data

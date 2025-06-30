@@ -1,3 +1,5 @@
+import { use } from "react";
+
 export const urlBase = 'https://my-pov-nine.vercel.app/mypov/api/v1/';
 //export const urlBase = 'http://localhost:5000/mypov/api/v1/';
 
@@ -124,12 +126,15 @@ export const api = {
   },
 
   //async editPost(postId, postData) {
-  async editPost(postId, postData) {
+
+  
+  async editPost(postData, postId) {
     const response = await fetch(`${urlBase}posts/${postId}`, {
       method: 'PATCH',
       credentials: 'include',
-      body: JSON.stringify(postData),
+      body: postData,
     });
+
     const res =  await response.json();
     if (response.ok) {
         return res;
